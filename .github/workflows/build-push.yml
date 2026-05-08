@@ -27,14 +27,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          provenance: false
-          tags: |
-            ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
-            ghcr.io/vashhuang-asus/demo-app:latest
+        run: |
+          docker build -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
+                       -t ghcr.io/vashhuang-asus/demo-app:latest .
+          docker push ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
+          docker push ghcr.io/vashhuang-asus/demo-app:latest
 
       - name: Update demo-gitops image tag
         env:
