@@ -28,10 +28,10 @@ jobs:
 
       - name: Build and push
         run: |
-          docker build -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
-                       -t ghcr.io/vashhuang-asus/demo-app:latest .
-          docker push ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
-          docker push ghcr.io/vashhuang-asus/demo-app:latest
+          docker buildx build --provenance=false \
+            -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
+            -t ghcr.io/vashhuang-asus/demo-app:latest \
+            --push .
 
       - name: Update demo-gitops image tag
         env:
