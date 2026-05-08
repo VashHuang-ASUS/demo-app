@@ -27,6 +27,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         run: |
           docker buildx build --provenance=false \
             -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
