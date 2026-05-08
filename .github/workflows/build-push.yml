@@ -41,5 +41,6 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add apps/demo-app/deployment.yaml
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "update demo-app image to ${VERSION}"
           git push
