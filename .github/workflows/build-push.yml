@@ -27,22 +27,21 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        env:
-          DOCKER_BUILDKIT: "0"
         run: |
-          docker build -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
-                       -t ghcr.io/vashhuang-asus/demo-app:latest .
-          docker push ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
-          docker push ghcr.io/vashhuang-asus/demo-app:latest
+          IMAGE="ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/demo-app"
+          docker build -t ${IMAGE}:${{ github.ref_name }} -t ${IMAGE}:latest .
+          docker push ${IMAGE}:${{ github.ref_name }}
+          docker push ${IMAGE}:latest
 
       - name: Update demo-gitops image tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
           VERSION=${GITHUB_REF_NAME}
+          IMAGE="ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/demo-app"
           git clone https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
           cd demo-gitops
-          sed -i "s|image: ghcr.io/vashhuang-asus/demo-app:.*|image: ghcr.io/vashhuang-asus/demo-app:${VERSION}|" apps/demo-app/deployment.yaml
+          sed -i "s|image: ${IMAGE}:.*|image: ${IMAGE}:${VERSION}|" apps/demo-app/deployment.yaml
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add apps/demo-app/deployment.yaml
