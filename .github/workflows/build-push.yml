@@ -26,29 +26,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/vashhuang-asus/demo-app
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
+            ghcr.io/vashhuang-asus/demo-app:latest
 
       - name: Update demo-gitops image tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          VERSION=${GITHUB_REF_NAME}
           git clone https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
           cd demo-gitops
           sed -i "s|image: ghcr.io/vashhuang-asus/demo-app:.*|image: ghcr.io/vashhuang-asus/demo-app:${VERSION}|" apps/demo-app/deployment.yaml
