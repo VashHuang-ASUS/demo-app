@@ -28,12 +28,12 @@ jobs:
 
       - name: Build and push
         env:
-          BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
+          DOCKER_BUILDKIT: "0"
         run: |
-          docker buildx build --provenance=false \
-            -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
-            -t ghcr.io/vashhuang-asus/demo-app:latest \
-            --push .
+          docker build -t ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }} \
+                       -t ghcr.io/vashhuang-asus/demo-app:latest .
+          docker push ghcr.io/vashhuang-asus/demo-app:${{ github.ref_name }}
+          docker push ghcr.io/vashhuang-asus/demo-app:latest
 
       - name: Update demo-gitops image tag
         env:
