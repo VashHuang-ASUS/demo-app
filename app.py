@@ -4,7 +4,7 @@ import os
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        version = os.getenv("APP_VERSION", "unknown")
+        version = os.getenv("APP_VERSION", "v1.0.1")
         body = f"version: {version}\n".encode()
         self.send_response(200)
         self.end_headers()

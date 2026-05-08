@@ -44,3 +44,17 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Update demo-gitops image tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITOPS_PAT }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          git clone https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
+          cd demo-gitops
+          sed -i "s|image: ghcr.io/vashhuang-asus/demo-app:.*|image: ghcr.io/vashhuang-asus/demo-app:${VERSION}|" apps/demo-app/deployment.yaml
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add apps/demo-app/deployment.yaml
+          git commit -m "update demo-app image to ${VERSION}"
+          git push
