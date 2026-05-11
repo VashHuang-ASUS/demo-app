@@ -38,6 +38,7 @@ jobs:
           git clone https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
           cd demo-gitops
           sed -i "s|image: ${IMAGE}:.*|image: ${IMAGE}:${VERSION}|" apps/demo-app/deployment.yaml
+          sed -i "s|value: \"[^\"]*\"|value: \"${VERSION}\"|" apps/demo-app/deployment.yaml
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add apps/demo-app/deployment.yaml
