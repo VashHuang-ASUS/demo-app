@@ -1,9 +1,9 @@
-name: Build and Push to GHCR
+name: Build and Push to GHCR (dev)
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - dev
 
 jobs:
   build-and-push:
@@ -23,25 +23,28 @@ jobs:
 
       - name: Build and push
         run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="dev-${SHORT_SHA}"
           IMAGE="ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/demo-app"
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -t ${IMAGE}:${{ github.ref_name }} -t ${IMAGE}:latest .
-          docker push ${IMAGE}:${{ github.ref_name }}
-          docker push ${IMAGE}:latest
+          docker build -t ${IMAGE}:${TAG} -t ${IMAGE}:dev-latest .
+          docker push ${IMAGE}:${TAG}
+          docker push ${IMAGE}:dev-latest
 
-      - name: Update demo-gitops image tag
+      - name: Update demo-gitops dev branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
-          VERSION=${GITHUB_REF_NAME}
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="dev-${SHORT_SHA}"
           IMAGE="ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/demo-app"
-          git clone https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
+          git clone --branch dev https://VashHuang-ASUS:${GITHUB_TOKEN}@github.com/VashHuang-ASUS/demo-gitops.git
           cd demo-gitops
-          sed -i "s|image: ${IMAGE}:.*|image: ${IMAGE}:${VERSION}|" apps/demo-app/deployment.yaml
-          sed -i "s|value: \"[^\"]*\"|value: \"${VERSION}\"|" apps/demo-app/deployment.yaml
+          sed -i "s|image: ${IMAGE}:.*|image: ${IMAGE}:${TAG}|" apps/demo-app/deployment.yaml
+          sed -i "s|value: \"[^\"]*\"|value: \"${TAG}\"|" apps/demo-app/deployment.yaml
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add apps/demo-app/deployment.yaml
           git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "update demo-app image to ${VERSION}"
-          git push
+          git commit -m "update demo-app image to ${TAG} (dev)"
+          git push origin dev
